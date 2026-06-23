@@ -95,10 +95,10 @@ export function AvailabilityGrid({
                         }}
                         onMouseEnter={() => handleEnter(key)}
                         className={
-                          "h-5 w-10 cursor-pointer border border-zinc-200 dark:border-zinc-700 " +
+                          "h-5 w-10 cursor-pointer border border-zinc-200 dark:border-zinc-700/60 " +
                           (on
-                            ? "bg-green-500"
-                            : "bg-white hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800")
+                            ? "bg-indigo-500"
+                            : "bg-white hover:bg-indigo-50 dark:bg-zinc-900 dark:hover:bg-zinc-800")
                         }
                       />
                     </td>
@@ -112,7 +112,7 @@ export function AvailabilityGrid({
 
       <button
         type="submit"
-        className="mt-4 rounded-full bg-zinc-900 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+        className="mt-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl"
       >
         Save my availability
       </button>
