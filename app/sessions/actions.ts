@@ -4,6 +4,11 @@ import { auth } from "@/auth";
 import { createAdminClient } from "@/lib/supabase";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import {
+  getValidAccessToken,
+  addCalendarEvent,
+  deleteCalendarEvent,
+} from "@/lib/google-calendar";
 
 export async function createSession(formData: FormData) {
   const session = await auth();
@@ -116,6 +121,57 @@ export async function setRsvp(formData: FormData) {
     throw new Error(error.message);
   }
 
+  // ── Google Calendar sync (best-effort: never block the RSVP) ──────────
+  try {
+    const accessToken = await getValidAccessToken(session.user.id);
+    if (accessToken) {
+      // Did this user already have a calendar event for this session?
+      const { data: rsvpRow } = await supabase
+        .from("rsvps")
+        .select("google_event_id")
+        .eq("session_id", sessionId)
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+      const existingEventId = rsvpRow?.google_event_id ?? null;
+
+      if (status === "going" && !existingEventId) {
+        // Add the session to their calendar.
+        const { data: detail } = await supabase
+          .from("sessions")
+          .select("title, location_or_link, start_time, end_time")
+          .eq("id", sessionId)
+          .single();
+        if (detail) {
+          const eventId = await addCalendarEvent(accessToken, {
+            summary: detail.title,
+            location: detail.location_or_link,
+            description: "Study session via StudySync",
+            startISO: detail.start_time,
+            endISO: detail.end_time,
+          });
+          if (eventId) {
+            await supabase
+              .from("rsvps")
+              .update({ google_event_id: eventId })
+              .eq("session_id", sessionId)
+              .eq("user_id", session.user.id);
+          }
+        }
+      } else if (status !== "going" && existingEventId) {
+        // They backed out — remove the calendar event we created.
+        await deleteCalendarEvent(accessToken, existingEventId);
+        await supabase
+          .from("rsvps")
+          .update({ google_event_id: null })
+          .eq("session_id", sessionId)
+          .eq("user_id", session.user.id);
+      }
+    }
+  } catch (e) {
+    console.error("Calendar sync failed:", e);
+  }
+
   // Re-render the session page so the new RSVP shows immediately.
   revalidatePath(`/sessions/${sessionId}`);
 }
+

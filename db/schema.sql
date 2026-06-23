@@ -17,6 +17,10 @@ create table if not exists users (
   name        text,
   email       text not null unique,   -- Google email; UNIQUE lets us "upsert" by it
   image       text,                   -- profile picture URL from Google
+  -- Google OAuth tokens for Calendar sync (server-only; RLS-locked).
+  google_access_token  text,
+  google_refresh_token text,
+  google_token_expiry  timestamptz,
   created_at  timestamptz not null default now()
 );
 
@@ -75,6 +79,8 @@ create table if not exists rsvps (
   user_id    uuid not null references users(id) on delete cascade,
   status     text not null check (status in ('going','maybe','no')),
   updated_at timestamptz not null default now(),
+  -- The Google Calendar event created when this user RSVP'd "going" (if any).
+  google_event_id text,
   primary key (session_id, user_id)
 );
 

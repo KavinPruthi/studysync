@@ -2,56 +2,61 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { createAdminClient } from "@/lib/supabase";
 
-// NextAuth() is configured once here and exports four helpers we use elsewhere:
-//   handlers → the GET/POST API routes that handle the OAuth round-trip
-//   signIn   → start a login (we call this from a button/server action)
-//   signOut  → end a session
-//   auth     → read the current session (works in server components, etc.)
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
-    // The Google provider knows how to talk to Google's OAuth servers.
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      authorization: {
+        params: {
+          // Ask for calendar-event access on top of basic profile/email.
+          scope:
+            "openid email profile https://www.googleapis.com/auth/calendar.events",
+          // access_type=offline + prompt=consent => Google returns a
+          // refresh_token, so we can renew the access token later without
+          // the user signing in again.
+          access_type: "offline",
+          prompt: "consent",
+        },
+      },
     }),
   ],
 
-  // Callbacks are functions NextAuth runs at specific moments. We use two:
   callbacks: {
-    // jwt() runs whenever the session token is created or updated.
-    // `profile` is ONLY present on the initial sign-in (the moment Google
-    // hands us the user's details) — the perfect time to save them to our DB.
-    async jwt({ token, profile }) {
-      if (profile?.email) {
+    // `account` is present only on the initial sign-in and holds the OAuth
+    // tokens. `profile` holds the Google profile. We use this moment to save
+    // both the user and their tokens to our database.
+    async jwt({ token, account, profile }) {
+      if (account && profile?.email) {
         const supabase = createAdminClient();
 
-        // upsert = "insert, or update if it already exists."
-        // onConflict: "email" means: if a row with this email already exists,
-        // update it instead of erroring (email is UNIQUE in our schema).
-        const { data, error } = await supabase
-          .from("users")
-          .upsert(
-            {
-              email: profile.email,
-              name: profile.name,
-              image: profile.picture,
-            },
-            { onConflict: "email" }
-          )
-          .select("id") // ask the DB to return the row's id
-          .single(); // we expect exactly one row back
-
-        // Stash our database user id inside the token so every future
-        // request carries it without another DB lookup.
-        if (!error && data) {
-          token.userId = data.id;
+        const updates: Record<string, unknown> = {
+          email: profile.email,
+          name: profile.name,
+          image: profile.picture,
+          google_access_token: account.access_token ?? null,
+          // expires_at is epoch SECONDS; store it as a real timestamp.
+          google_token_expiry: account.expires_at
+            ? new Date(account.expires_at * 1000).toISOString()
+            : null,
+        };
+        // Only overwrite the refresh token if Google actually sent one
+        // (it might not on a repeat login — don't clobber the saved one).
+        if (account.refresh_token) {
+          updates.google_refresh_token = account.refresh_token;
         }
+
+        const { data } = await supabase
+          .from("users")
+          .upsert(updates, { onConflict: "email" })
+          .select("id")
+          .single();
+
+        if (data) token.userId = data.id;
       }
       return token;
     },
 
-    // session() shapes what your app sees when it calls auth().
-    // We copy the DB id from the token onto session.user.id.
     async session({ session, token }) {
       if (token.userId) {
         session.user.id = token.userId as string;
