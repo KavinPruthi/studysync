@@ -28,6 +28,9 @@ create table if not exists groups (
   name        text not null,
   course_code text not null,
   description text,
+  -- Short shareable code classmates type to join. Auto-generated & unique.
+  invite_code text not null unique
+              default upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 8)),
   -- created_by points at a user. ON DELETE CASCADE => if that user is
   -- deleted, their groups go too (no orphaned rows pointing at nobody).
   created_by  uuid not null references users(id) on delete cascade,
