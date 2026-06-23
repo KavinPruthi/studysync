@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { deleteGroup } from "../actions";
 import { DeleteGroupButton } from "./DeleteGroupButton";
+import { formatDateTimeRange } from "@/lib/dates";
 
 // In Next.js 15+, `params` is a Promise, so the component is async and we await it.
 // The [id] from the folder name arrives here as params.id.
@@ -58,6 +59,15 @@ export default async function GroupPage({
     .eq("group_id", id)
     .order("joined_at")
     .returns<MemberRow[]>();
+
+  // Upcoming sessions = those whose end time is still in the future,
+  // soonest first.
+  const { data: sessions } = await supabase
+    .from("sessions")
+    .select("id, title, location_or_link, start_time, end_time")
+    .eq("group_id", id)
+    .gte("end_time", new Date().toISOString())
+    .order("start_time", { ascending: true });
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-12">
@@ -129,10 +139,61 @@ export default async function GroupPage({
         </ul>
       </section>
 
-      {/* Placeholders for features we build next. */}
-      <section className="mt-10 rounded-lg border border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
-        Study sessions (Phase 3) and the availability grid (Phase 4) will live
-        here.
+      <section className="mt-10">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+            Upcoming sessions
+          </h2>
+          <Link
+            href={`/groups/${id}/sessions/new`}
+            className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+          >
+            + New session
+          </Link>
+        </div>
+
+        {!sessions || sessions.length === 0 ? (
+          <p className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
+            No upcoming sessions yet.
+          </p>
+        ) : (
+          <ul className="mt-3 flex flex-col gap-2">
+            {sessions.map((s) => (
+              <li key={s.id}>
+                <Link
+                  href={`/sessions/${s.id}`}
+                  className="block rounded-lg border border-zinc-200 px-4 py-3 transition-colors hover:border-zinc-400 dark:border-zinc-700 dark:hover:border-zinc-500"
+                >
+                  <p className="font-medium text-zinc-900 dark:text-zinc-100">
+                    {s.title}
+                  </p>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                    {formatDateTimeRange(s.start_time, s.end_time)}
+                  </p>
+                  {s.location_or_link && (
+                    <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-500">
+                      {s.location_or_link}
+                    </p>
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="mt-6">
+        <Link
+          href={`/groups/${id}/availability`}
+          className="block rounded-lg border border-zinc-200 px-4 py-3 transition-colors hover:border-zinc-400 dark:border-zinc-700 dark:hover:border-zinc-500"
+        >
+          <p className="font-medium text-zinc-900 dark:text-zinc-100">
+            🗓️ Find a time that works
+          </p>
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            Set your weekly availability and see when everyone overlaps.
+          </p>
+        </Link>
       </section>
 
       {/* Admin-only controls. membership.role comes from the auth check above. */}
