@@ -47,7 +47,7 @@ export default async function Home() {
           to your Google Calendar.
         </p>
 
-        <div className="mt-10 flex items-center justify-center">
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
           {session?.user ? (
             <Link
               href="/dashboard"
@@ -73,7 +73,20 @@ export default async function Home() {
               </button>
             </form>
           )}
+
+          {/* A way in for anyone who has not signed up. Without this the whole
+              app is a login wall, and the heatmap is the part worth seeing. */}
+          <Link
+            href="/demo"
+            className="inline-flex items-center gap-2 rounded-xl border border-zinc-300 px-7 py-3.5 font-semibold text-zinc-700 transition-colors hover:border-zinc-400 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:text-white"
+          >
+            See a live demo
+          </Link>
         </div>
+
+        <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-500">
+          No account needed to look around.
+        </p>
       </section>
 
       {/* Features */}
