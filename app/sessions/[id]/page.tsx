@@ -77,12 +77,12 @@ export default async function SessionPage({
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
       <Link
-        href={`/groups/${sess.group_id}`} className="text-sm text-muted transition-colors hover:text-ink dark:text-muted-2"
+        href={`/groups/${sess.group_id}`} className="text-sm text-muted transition-colors hover:text-ink"
       >
         ← {group?.name ?? "Back to group"}
       </Link>
 
-      <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface/70 shadow-sm backdrop-blur dark:border-line dark:bg-ink/60">
+      <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface/70 shadow-sm backdrop-blur">
         
         <div className="p-6">
           <h1 className="text-3xl font-extrabold tracking-tight text-ink">
@@ -163,7 +163,7 @@ export default async function SessionPage({
                 <ul className="mt-2 flex flex-wrap gap-2">
                   {people.map((r) => (
                     <li
-                      key={r.users.id} className="flex items-center gap-2 rounded-full border border-line bg-surface/70 py-1 pl-1 pr-3 backdrop-blur dark:border-line dark:bg-ink/60"
+                      key={r.users.id} className="flex items-center gap-2 rounded-full border border-line bg-surface/70 py-1 pl-1 pr-3 backdrop-blur"
                     >
                       {r.users.image ? (
                         // eslint-disable-next-line @next/next/no-img-element

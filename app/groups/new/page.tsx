@@ -15,12 +15,12 @@ export default async function NewGroupPage() {
   return (
     <main className="mx-auto w-full max-w-lg flex-1 px-6 py-12">
       <Link
-        href="/dashboard" className="text-sm text-muted transition-colors hover:text-ink dark:text-muted-2"
+        href="/dashboard" className="text-sm text-muted transition-colors hover:text-ink"
       >
         ← Dashboard
       </Link>
 
-      <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface/70 shadow-sm backdrop-blur dark:bg-ink/60">
+      <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface/70 shadow-sm backdrop-blur">
         
         <div className="p-6">
           <h1 className="text-2xl font-extrabold tracking-tight text-ink">

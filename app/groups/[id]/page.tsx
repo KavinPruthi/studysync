@@ -64,13 +64,13 @@ export default async function GroupPage({
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-10">
       <Link
-        href="/dashboard" className="text-sm text-muted transition-colors hover:text-ink dark:text-muted-2"
+        href="/dashboard" className="text-sm text-muted transition-colors hover:text-ink"
       >
         ← Dashboard
       </Link>
 
       {/* Group header card */}
-      <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface/70 shadow-sm backdrop-blur dark:border-line dark:bg-ink/60">
+      <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface/70 shadow-sm backdrop-blur">
         <div className="h-1 w-full" style={courseMarkStyle(group.course_code)} />
         <div className="p-6">
           <span className="inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold" style={courseBadgeStyle(
@@ -89,7 +89,7 @@ export default async function GroupPage({
           )}
 
           {/* Invite code */}
-          <div className="mt-5 flex flex-wrap items-center gap-3 rounded-xl border border-line bg-surface-2/80 px-4 py-3 dark:border-line">
+          <div className="mt-5 flex flex-wrap items-center gap-3 rounded-xl border border-line bg-surface-2/80 px-4 py-3">
             <span className="text-xs font-medium uppercase tracking-wide text-muted">
               Invite code
             </span>
@@ -105,7 +105,7 @@ export default async function GroupPage({
 
       {/* Find a time */}
       <Link
-        href={`/groups/${id}/availability`} className="mt-6 flex items-center gap-4 rounded-2xl border border-line bg-surface/70 p-5 shadow-sm backdrop-blur transition-all hover:shadow-md dark:border-line dark:bg-ink/60"
+        href={`/groups/${id}/availability`} className="mt-6 flex items-center gap-4 rounded-2xl border border-line bg-surface/70 p-5 shadow-sm backdrop-blur transition-all hover:shadow-md"
       >
         <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-surface-2">
           🗓️
@@ -135,7 +135,7 @@ export default async function GroupPage({
         </div>
 
         {!sessions || sessions.length === 0 ? (
-          <p className="mt-3 rounded-xl border border-dashed border-line px-4 py-6 text-center text-sm text-muted dark:border-line dark:text-muted-2">
+          <p className="mt-3 rounded-xl border border-dashed border-line px-4 py-6 text-center text-sm text-muted">
             No upcoming sessions yet.
           </p>
         ) : (
@@ -143,9 +143,9 @@ export default async function GroupPage({
             {sessions.map((s) => (
               <li key={s.id}>
                 <Link
-                  href={`/sessions/${s.id}`} className="flex items-center gap-4 rounded-xl border border-line bg-surface/70 px-4 py-3 shadow-sm backdrop-blur transition-all hover:shadow-md dark:border-line dark:bg-ink/60"
+                  href={`/sessions/${s.id}`} className="flex items-center gap-4 rounded-xl border border-line bg-surface/70 px-4 py-3 shadow-sm backdrop-blur transition-all hover:shadow-md"
                 >
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-accent text-accent dark:bg-accent dark:text-accent">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-accent text-accent">
                     📚
                   </div>
                   <div className="min-w-0">
@@ -179,7 +179,7 @@ export default async function GroupPage({
         <ul className="mt-3 flex flex-col gap-2">
           {members?.map((m) => (
             <li
-              key={m.users.id} className="flex items-center gap-3 rounded-xl border border-line bg-surface/60 px-4 py-3 backdrop-blur dark:border-line dark:bg-ink/50"
+              key={m.users.id} className="flex items-center gap-3 rounded-xl border border-line bg-surface/60 px-4 py-3 backdrop-blur"
             >
               {m.users.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -212,11 +212,11 @@ export default async function GroupPage({
 
       {/* Admin-only controls */}
       {membership.role === "admin" && (
-        <section className="mt-10 rounded-2xl border border-red-200 bg-red-50/50 p-5 dark:border-red-900/40 dark:bg-red-950/20">
-          <h2 className="text-sm font-semibold text-red-700 dark:text-red-300">
+        <section className="mt-10 rounded-2xl border border-danger/40 bg-danger/10 p-5">
+          <h2 className="text-sm font-semibold text-danger">
             Danger zone
           </h2>
-          <p className="mt-1 mb-3 text-sm text-red-600/80 dark:text-red-400/80">
+          <p className="mt-1 mb-3 text-sm text-danger">
             Deleting this group removes it for every member. This can&apos;t be
             undone.
           </p>

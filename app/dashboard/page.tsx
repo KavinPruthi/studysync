@@ -60,7 +60,7 @@ export default async function DashboardPage({
 
       {/* Join by code */}
       <form
-        action={joinGroup} className="mt-6 flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-surface/60 p-2 pl-4 shadow-sm backdrop-blur dark:bg-ink/50"
+        action={joinGroup} className="mt-6 flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-surface/60 p-2 pl-4 shadow-sm backdrop-blur"
       >
         <span className="text-sm text-muted">
           Got an invite code?
@@ -70,20 +70,20 @@ export default async function DashboardPage({
           placeholder="e.g. A3F8B2C1" className="min-w-0 flex-1 rounded-lg border border-line bg-surface px-3 py-2 font-mono text-sm uppercase tracking-wider text-ink placeholder:font-sans placeholder:normal-case placeholder:tracking-normal placeholder:text-muted-2 outline-none focus:border-accent focus:ring-2 focus:ring-accent"
         />
         <button
-          type="submit" className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-bg transition-colors hover:bg-ink dark:bg-surface dark:text-ink"
+          type="submit" className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-bg transition-colors hover:bg-ink"
         >
           Join
         </button>
       </form>
 
       {error && (
-        <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
+        <p className="mt-3 rounded-xl border border-danger/40 bg-danger/10 px-4 py-2.5 text-sm text-danger">
           {error}
         </p>
       )}
 
       {groups.length === 0 ? (
-        <div className="mt-10 rounded-2xl border border-dashed border-line bg-surface/40 p-12 text-center dark:bg-ink/30">
+        <div className="mt-10 rounded-2xl border border-dashed border-line bg-surface/40 p-12 text-center">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-ink text-2xl">
             👥
           </div>
@@ -101,7 +101,7 @@ export default async function DashboardPage({
           {groups.map((g) => (
             <li key={g.id}>
               <Link
-                href={`/groups/${g.id}`} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-surface/70 shadow-sm backdrop-blur transition-colors hover:-translate-y-1 hover:shadow-xl dark:bg-ink/60"
+                href={`/groups/${g.id}`} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-surface/70 shadow-sm backdrop-blur transition-colors hover:-translate-y-1 hover:shadow-xl"
               >
                 <div className="h-1 w-full" style={courseMarkStyle(g.course_code
                   )} />
