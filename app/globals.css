@@ -1,32 +1,114 @@
 @import "tailwindcss";
 
+/* StudySync — visual system
+   ---------------------------------------------------------------------------
+   The subject is time, so the reference is a wall planner: a calm gridded
+   surface where the only thing competing for attention is the schedule itself.
+
+   One rule governs colour. The interface is greyscale, and green is reserved
+   entirely for availability — a cell is green because people are free then, and
+   for no other reason. Nothing decorative is green, so intensity always means
+   "how many people". */
+
 :root {
-  --background: #ffffff;
-  --foreground: #18181b;
+  /* Cool off-white rather than pure white: less glare, and it lets white cards
+     sit on top of it as a distinct layer. */
+  --bg: #f7f8f9;
+  --surface: #ffffff;
+  --surface-2: #eef0f2;
+  --line: #ced2d8;
+  --line-strong: #878d94; /* clears 3:1 for non-text contrast */
+
+  --ink: #14161a;
+  --muted: #545a62; /* body secondary */
+  --muted-2: #6a7079; /* captions, still AA */
+
+  /* The single accent, used flat. Doubles as the availability colour, which is
+     the point: the brand IS the heatmap. */
+  --accent: #146c48;
+  --accent-soft: #e6f0eb;
+  --accent-ink: #0d4a31;
+
+  --danger: #a3312a;
+}
+
+:root[data-theme="dark"] {
+  --bg: #101216;
+  --surface: #171a1f;
+  --surface-2: #1f232a;
+  --line: #2c313a;
+  --line-strong: #666d78;
+
+  --ink: #e9ecf0;
+  --muted: #a8aeb7;
+  --muted-2: #878e98;
+
+  --accent: #4cb98a;
+  --accent-soft: #14251e;
+  --accent-ink: #7fd6ae;
+
+  --danger: #e0736a;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-muted-2: var(--muted-2);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-danger: var(--danger);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #09090f;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--ink);
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   min-height: 100vh;
-  /* Soft, colorful ambient glow behind everything (works in light + dark). */
-  background:
-    radial-gradient(55rem 55rem at 100% -10%, rgba(139, 92, 246, 0.12), transparent 60%),
-    radial-gradient(50rem 50rem at -10% 5%, rgba(56, 189, 248, 0.10), transparent 55%),
-    var(--background);
-  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Times and counts line up in columns, so they are tabular. */
+.nums {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Quiet caption. Sentence case and small — a label, not a shout. */
+.label {
+  font-size: 11.5px;
+  color: var(--muted-2);
+}
+
+/* Headlines: large, tight, and light on their feet. */
+.display {
+  letter-spacing: -0.035em;
+  font-weight: 500;
+  text-wrap: balance;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
 }

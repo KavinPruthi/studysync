@@ -57,8 +57,7 @@ export function AvailabilityGrid({
       />
 
       {/* select-none stops the browser from highlighting text while dragging. */}
-      <div
-        className="select-none overflow-x-auto"
+      <div className="select-none overflow-x-auto"
         onMouseUp={stop}
         onMouseLeave={stop}
       >
@@ -68,8 +67,7 @@ export function AvailabilityGrid({
               <th className="w-16"></th>
               {DAY_LABELS.map((d) => (
                 <th
-                  key={d}
-                  className="px-1 pb-2 text-xs font-medium text-zinc-600 dark:text-zinc-400"
+                  key={d} className="px-1 pb-2 text-xs font-medium text-muted"
                 >
                   {d}
                 </th>
@@ -80,7 +78,7 @@ export function AvailabilityGrid({
             {Array.from({ length: SLOTS_PER_DAY }).map((_, slot) => (
               <tr key={slot}>
                 {/* Show the time only on the hour (every 2nd 30-min slot). */}
-                <td className="pr-2 text-right align-top text-[10px] leading-5 text-zinc-400">
+                <td className="pr-2 text-right align-top text-[10px] leading-5 text-muted-2">
                   {slot % 2 === 0 ? slotLabel(slot) : ""}
                 </td>
                 {DAY_LABELS.map((_, day) => {
@@ -95,10 +93,10 @@ export function AvailabilityGrid({
                         }}
                         onMouseEnter={() => handleEnter(key)}
                         className={
-                          "h-5 w-10 cursor-pointer border border-zinc-200 dark:border-zinc-700/60 " +
+                          "h-5 w-10 cursor-pointer border border-line " +
                           (on
-                            ? "bg-indigo-500"
-                            : "bg-white hover:bg-indigo-50 dark:bg-zinc-900 dark:hover:bg-zinc-800")
+                            ? "bg-accent"
+                            : "bg-surface hover:bg-accent-soft")
                         }
                       />
                     </td>
@@ -111,8 +109,7 @@ export function AvailabilityGrid({
       </div>
 
       <button
-        type="submit"
-        className="mt-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+        type="submit" className="mt-4 rounded-xl bg-ink px-6 py-3 text-sm font-semibold text-bg transition-all hover:-translate-y-0.5 hover:shadow-xl"
       >
         Save my availability
       </button>

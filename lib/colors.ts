@@ -1,23 +1,13 @@
-// Deterministically map a course code to a color, so "CS 180" always looks the
-// same and different courses get visually distinct accents.
+// Deterministically map a course code to a colour, so "CS 180" always looks the
+// same and two courses in a list are easy to tell apart.
+//
+// These hues exist to DISTINGUISH courses from each other, which is a different
+// job from the green used for availability. They are held at a single low
+// saturation and matching lightness so no course shouts louder than another,
+// and so none of them competes with the heatmap — which is the only place in
+// the app where colour carries a measurement.
 
-const BADGES = [
-  "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300",
-  "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300",
-  "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
-  "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
-  "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300",
-  "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/15 dark:text-fuchsia-300",
-];
-
-const GRADIENTS = [
-  "from-indigo-500 to-violet-500",
-  "from-blue-500 to-cyan-500",
-  "from-emerald-500 to-teal-500",
-  "from-amber-500 to-orange-500",
-  "from-rose-500 to-pink-500",
-  "from-fuchsia-500 to-purple-500",
-];
+const HUES = [212, 265, 158, 32, 348, 190];
 
 function hash(code: string): number {
   let h = 0;
@@ -27,12 +17,22 @@ function hash(code: string): number {
   return h;
 }
 
-// Tailwind classes for a small pill badge.
-export function courseBadge(code: string): string {
-  return BADGES[hash(code) % BADGES.length];
+/** A stable hue for one course code. */
+export function courseHue(code: string): number {
+  return HUES[hash(code) % HUES.length];
 }
 
-// Tailwind from-/to- classes for a gradient accent (cards, avatars, bars).
-export function courseGradient(code: string): string {
-  return GRADIENTS[hash(code) % GRADIENTS.length];
+/** Inline styles for a small pill badge. Inline rather than Tailwind classes
+ *  because the hue is computed at runtime and Tailwind cannot see it. */
+export function courseBadgeStyle(code: string): React.CSSProperties {
+  const h = courseHue(code);
+  return {
+    backgroundColor: `hsl(${h} 42% 92%)`,
+    color: `hsl(${h} 55% 28%)`,
+  };
+}
+
+/** A flat marker colour for rails, dots and avatars. */
+export function courseMarkStyle(code: string): React.CSSProperties {
+  return { backgroundColor: `hsl(${courseHue(code)} 45% 45%)` };
 }

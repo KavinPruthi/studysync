@@ -10,31 +10,30 @@ export default async function NewGroupPage() {
   }
 
   const inputClasses =
-    "w-full rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-zinc-900 placeholder-zinc-400 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500";
+    "w-full rounded-xl border border-line bg-surface px-4 py-2.5 text-ink placeholder:text-muted-2 outline-none transition focus:border-accent focus:ring-2 focus:ring-accent";
 
   return (
     <main className="mx-auto w-full max-w-lg flex-1 px-6 py-12">
       <Link
-        href="/dashboard"
-        className="text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
+        href="/dashboard" className="text-sm text-muted transition-colors hover:text-ink dark:text-muted-2"
       >
         ← Dashboard
       </Link>
 
-      <div className="mt-4 overflow-hidden rounded-2xl border border-zinc-200 bg-white/70 shadow-sm backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/60">
-        <div className="h-2 w-full bg-gradient-to-r from-indigo-500 to-violet-500" />
+      <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface/70 shadow-sm backdrop-blur dark:bg-ink/60">
+        
         <div className="p-6">
-          <h1 className="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+          <h1 className="text-2xl font-extrabold tracking-tight text-ink">
             Create a study group
           </h1>
-          <p className="mt-1.5 text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mt-1.5 text-sm text-muted">
             Start a group for one of your courses. You can invite classmates
             next.
           </p>
 
           <form action={createGroup} className="mt-6 flex flex-col gap-5">
             <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <span className="text-sm font-medium text-muted">
                 Group name
               </span>
               <input
@@ -46,7 +45,7 @@ export default async function NewGroupPage() {
             </label>
 
             <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <span className="text-sm font-medium text-muted">
                 Course code
               </span>
               <input
@@ -58,9 +57,9 @@ export default async function NewGroupPage() {
             </label>
 
             <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <span className="text-sm font-medium text-muted">
                 Description{" "}
-                <span className="text-zinc-400 dark:text-zinc-500">
+                <span className="text-muted-2">
                   (optional)
                 </span>
               </span>
@@ -73,8 +72,7 @@ export default async function NewGroupPage() {
             </label>
 
             <button
-              type="submit"
-              className="mt-1 w-full rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3 font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+              type="submit" className="mt-1 w-full rounded-xl bg-ink px-6 py-3 font-semibold text-bg transition-colors hover:shadow-xl"
             >
               Create group
             </button>

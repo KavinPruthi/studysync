@@ -9,20 +9,20 @@ const RSVP_OPTIONS = [
   {
     value: "going",
     label: "Going",
-    active: "bg-emerald-500 text-white shadow-md shadow-emerald-500/30",
-    idle: "border border-zinc-300 text-zinc-700 hover:border-emerald-400 hover:text-emerald-600 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-emerald-500 dark:hover:text-emerald-400",
+    active: "bg-accent text-bg",
+    idle: "border border-line-strong text-muted hover:border-accent hover:text-accent",
   },
   {
     value: "maybe",
     label: "Maybe",
-    active: "bg-amber-500 text-white shadow-md shadow-amber-500/30",
-    idle: "border border-zinc-300 text-zinc-700 hover:border-amber-400 hover:text-amber-600 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-amber-500 dark:hover:text-amber-400",
+    active: "bg-muted text-bg",
+    idle: "border border-line-strong text-muted hover:border-line-strong hover:text-ink",
   },
   {
     value: "no",
     label: "Can't go",
-    active: "bg-rose-500 text-white shadow-md shadow-rose-500/30",
-    idle: "border border-zinc-300 text-zinc-700 hover:border-rose-400 hover:text-rose-600 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-rose-500 dark:hover:text-rose-400",
+    active: "bg-danger text-bg",
+    idle: "border border-line-strong text-muted hover:border-danger hover:text-danger",
   },
 ] as const;
 
@@ -77,31 +77,29 @@ export default async function SessionPage({
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
       <Link
-        href={`/groups/${sess.group_id}`}
-        className="text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
+        href={`/groups/${sess.group_id}`} className="text-sm text-muted transition-colors hover:text-ink dark:text-muted-2"
       >
         ← {group?.name ?? "Back to group"}
       </Link>
 
-      <div className="mt-4 overflow-hidden rounded-2xl border border-zinc-200 bg-white/70 shadow-sm backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/60">
-        <div className="h-2 w-full bg-gradient-to-r from-indigo-500 to-violet-500" />
+      <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface/70 shadow-sm backdrop-blur dark:border-line dark:bg-ink/60">
+        
         <div className="p-6">
-          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+          <h1 className="text-3xl font-extrabold tracking-tight text-ink">
             {sess.title}
           </h1>
-          <p className="mt-2 flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
+          <p className="mt-2 flex items-center gap-2 text-muted">
             <span>🕒</span>
             {formatDateTimeRange(sess.start_time, sess.end_time)}
           </p>
           {sess.location_or_link && (
-            <p className="mt-1 flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
+            <p className="mt-1 flex items-center gap-2 text-muted">
               <span>📍</span>
               {isLink ? (
                 <a
                   href={sess.location_or_link}
                   target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-indigo-600 underline dark:text-indigo-400"
+                  rel="noopener noreferrer" className="text-accent underline"
                 >
                   {sess.location_or_link}
                 </a>
@@ -113,7 +111,7 @@ export default async function SessionPage({
 
           {/* RSVP */}
           <div className="mt-6">
-            <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <h2 className="text-sm font-medium text-muted">
               Your RSVP
             </h2>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -137,7 +135,7 @@ export default async function SessionPage({
               })}
             </div>
             {myRsvp === "going" && (
-              <p className="mt-2 text-xs text-emerald-600 dark:text-emerald-400">
+              <p className="mt-2 text-xs text-accent">
                 ✓ Added to your Google Calendar
               </p>
             )}
@@ -151,36 +149,34 @@ export default async function SessionPage({
           const people = byStatus(opt.value);
           return (
             <div key={opt.value}>
-              <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
+              <h3 className="text-sm font-semibold text-ink">
                 {opt.label}{" "}
-                <span className="text-zinc-400 dark:text-zinc-500">
+                <span className="text-muted-2">
                   ({people.length})
                 </span>
               </h3>
               {people.length === 0 ? (
-                <p className="mt-1 text-sm text-zinc-400 dark:text-zinc-500">
+                <p className="mt-1 text-sm text-muted-2">
                   No one yet.
                 </p>
               ) : (
                 <ul className="mt-2 flex flex-wrap gap-2">
                   {people.map((r) => (
                     <li
-                      key={r.users.id}
-                      className="flex items-center gap-2 rounded-full border border-zinc-200 bg-white/70 py-1 pl-1 pr-3 backdrop-blur dark:border-zinc-700 dark:bg-zinc-900/60"
+                      key={r.users.id} className="flex items-center gap-2 rounded-full border border-line bg-surface/70 py-1 pl-1 pr-3 backdrop-blur dark:border-line dark:bg-ink/60"
                     >
                       {r.users.image ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={r.users.image}
-                          alt=""
-                          className="h-6 w-6 rounded-full"
+                          alt="" className="h-6 w-6 rounded-full"
                         />
                       ) : (
-                        <div className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-zinc-300 to-zinc-400 text-xs font-bold text-white dark:from-zinc-600 dark:to-zinc-700">
+                        <div className="grid h-6 w-6 place-items-center rounded-full bg-surface-2 text-xs font-medium text-muted">
                           {(r.users.name ?? "?").charAt(0).toUpperCase()}
                         </div>
                       )}
-                      <span className="text-sm text-zinc-700 dark:text-zinc-300">
+                      <span className="text-sm text-muted">
                         {r.users.name}
                       </span>
                     </li>

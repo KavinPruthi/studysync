@@ -1,115 +1,140 @@
 import Link from "next/link";
 import { auth, signIn } from "@/auth";
-
-const FEATURES = [
-  {
-    icon: "👥",
-    gradient: "from-indigo-500 to-violet-500",
-    title: "Study groups",
-    desc: "Spin up a group for each course and invite classmates with a simple code.",
-  },
-  {
-    icon: "🗓️",
-    gradient: "from-violet-500 to-fuchsia-500",
-    title: "Sessions & RSVPs",
-    desc: "Schedule sessions, RSVP in a click, and sync them to your Google Calendar.",
-  },
-  {
-    icon: "⚡",
-    gradient: "from-blue-500 to-cyan-500",
-    title: "Overlap heatmap",
-    desc: "Everyone marks their free time; instantly see the best slot for the whole group.",
-  },
-];
+import { Heatmap, bestTimesFrom } from "@/components/Heatmap";
+import { DEMO_ROWS, DEMO_MEMBER_COUNT } from "@/lib/demo-data";
+import {
+  DAY_LABELS,
+  computeOverlap,
+  mergeSlots,
+  slotLabel,
+} from "@/lib/availability";
 
 export default async function Home() {
   const session = await auth();
 
+  // The real function on real-shaped data. The landing page shows the product
+  // rather than a description of it, and it cannot drift out of date because it
+  // is the same code path the app uses.
+  const heatmap = computeOverlap(DEMO_ROWS);
+  const maxOverlap = bestTimesFrom(heatmap);
+
+  const bestTimes: { day: number; start: number; end: number }[] = [];
+  heatmap.forEach((daySlots, day) => {
+    const hits = daySlots
+      .map((c, slot) => (c === maxOverlap ? slot : -1))
+      .filter((s) => s >= 0);
+    for (const r of mergeSlots(hits)) bestTimes.push({ day, start: r.start, end: r.end });
+  });
+
   return (
     <main className="flex-1">
-      {/* Hero */}
-      <section className="mx-auto max-w-5xl px-6 pt-20 pb-16 text-center">
-        <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-sm font-medium text-indigo-700 dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-300">
-          📅 Study scheduling, simplified
-        </span>
+      <section className="mx-auto grid max-w-5xl gap-12 px-6 pt-16 pb-20 lg:grid-cols-[1fr_auto] lg:items-start lg:gap-16">
+        {/* Left: the pitch */}
+        <div className="max-w-lg">
+          <h1 className="display text-[42px] leading-[1.08]">
+            Find a time that works for everyone.
+          </h1>
 
-        <h1 className="mx-auto mt-6 max-w-3xl text-5xl font-extrabold tracking-tight text-zinc-900 sm:text-6xl dark:text-white">
-          Find a time that{" "}
-          <span className="bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent">
-            actually works
-          </span>{" "}
-          for everyone.
-        </h1>
+          <p className="mt-5 text-[17px] leading-relaxed text-muted">
+            Everyone marks when they are free. StudySync shows you the slots the
+            whole group can make, and puts the session on their calendars.
+          </p>
 
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-zinc-600 dark:text-zinc-400">
-          StudySync helps you and your classmates form study groups, schedule
-          sessions, and instantly see when everyone&apos;s free — synced right
-          to your Google Calendar.
-        </p>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            {session?.user ? (
+              <Link
+                href="/dashboard" className="rounded-full bg-ink px-6 py-2.5 text-[15px] font-medium text-bg transition-opacity hover:opacity-90"
+              >
+                Go to your dashboard
+              </Link>
+            ) : (
+              <form
+                action={async () => {
+                  "use server";
+                  await signIn("google", { redirectTo: "/dashboard" });
+                }}
+              >
+                <button className="flex items-center gap-2.5 rounded-full bg-ink px-6 py-2.5 text-[15px] font-medium text-bg transition-opacity hover:opacity-90">
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      fill="currentColor"
+                      d="M12 11v2.8h4c-.2 1-1.3 3-4 3a3.8 3.8 0 0 1 0-7.6c1.2 0 2 .5 2.5.95l1.9-1.85C15.1 6.2 13.7 5.6 12 5.6a6.4 6.4 0 1 0 0 12.8c3.7 0 6.1-2.6 6.1-6.25 0-.42-.05-.74-.1-1.05H12z"
+                    />
+                  </svg>
+                  Sign in with Google
+                </button>
+              </form>
+            )}
 
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-          {session?.user ? (
             <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-7 py-3.5 font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40"
+              href="/demo" className="rounded-full border border-line-strong px-6 py-2.5 text-[15px] text-muted transition-colors hover:text-ink"
             >
-              Go to your dashboard →
+              See it working
             </Link>
-          ) : (
-            <form
-              action={async () => {
-                "use server";
-                await signIn("google", { redirectTo: "/dashboard" });
-              }}
-            >
-              <button className="inline-flex items-center gap-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-7 py-3.5 font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/40">
-                <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    fill="#fff"
-                    d="M12 11v2.8h4c-.2 1-1.3 3-4 3a3.8 3.8 0 0 1 0-7.6c1.2 0 2 .5 2.5.95l1.9-1.85C15.1 6.2 13.7 5.6 12 5.6a6.4 6.4 0 1 0 0 12.8c3.7 0 6.1-2.6 6.1-6.25 0-.42-.05-.74-.1-1.05H12z"
-                  />
-                </svg>
-                Sign in with Google
-              </button>
-            </form>
-          )}
+          </div>
 
-          {/* A way in for anyone who has not signed up. Without this the whole
-              app is a login wall, and the heatmap is the part worth seeing. */}
-          <Link
-            href="/demo"
-            className="inline-flex items-center gap-2 rounded-xl border border-zinc-300 px-7 py-3.5 font-semibold text-zinc-700 transition-colors hover:border-zinc-400 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:text-white"
-          >
-            See a live demo
-          </Link>
+          <p className="mt-4 text-[13px] text-muted-2">
+            No account needed to look around.
+          </p>
+
+          {/* Three things, stated plainly. No icons: the words are the content. */}
+          <dl className="mt-12 space-y-5 border-t border-line pt-8">
+            {[
+              [
+                "Overlap, not guesswork",
+                "The week is split into half-hour slots. Every slot counts how many people are free, so the best time is the one with the highest count.",
+              ],
+              [
+                "Groups by course",
+                "Make a group, share a code, and classmates join. No email chains.",
+              ],
+              [
+                "On the calendar",
+                "RSVP going and the session appears in Google Calendar. Back out and it disappears.",
+              ],
+            ].map(([title, desc]) => (
+              <div key={title}>
+                <dt className="text-[15px] font-medium">{title}</dt>
+                <dd className="mt-1 text-[14px] leading-relaxed text-muted">
+                  {desc}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
 
-        <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-500">
-          No account needed to look around.
-        </p>
-      </section>
-
-      {/* Features */}
-      <section className="mx-auto max-w-5xl px-6 pb-24">
-        <div className="grid gap-6 sm:grid-cols-3">
-          {FEATURES.map((f) => (
-            <div
-              key={f.title}
-              className="rounded-2xl border border-zinc-200 bg-white/70 p-6 shadow-sm backdrop-blur transition-shadow hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900/60"
-            >
-              <div
-                className={`grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br ${f.gradient} text-2xl shadow-md`}
-              >
-                {f.icon}
-              </div>
-              <h3 className="mt-4 font-semibold text-zinc-900 dark:text-white">
-                {f.title}
-              </h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-                {f.desc}
-              </p>
+        {/* Right: the actual thing */}
+        <div className="lg:sticky lg:top-24">
+          <div className="rounded-2xl border border-line bg-surface p-6">
+            <div className="flex items-baseline justify-between gap-4">
+              <span className="text-[14px] font-medium">A group of {DEMO_MEMBER_COUNT}</span>
+              <span className="label">example</span>
             </div>
-          ))}
+
+            <div className="mt-4">
+              <Heatmap
+                heatmap={heatmap}
+                totalMembers={DEMO_MEMBER_COUNT}
+                maxOverlap={maxOverlap}
+                compact
+              />
+            </div>
+
+            {bestTimes.length > 0 && (
+              <div className="mt-5 border-t border-line pt-4">
+                <div className="label">
+                  Everyone free · {maxOverlap} of {DEMO_MEMBER_COUNT}
+                </div>
+                <ul className="nums mt-2 space-y-1 text-[13px] text-accent">
+                  {bestTimes.map((b, i) => (
+                    <li key={i}>
+                      {DAY_LABELS[b.day]} {slotLabel(b.start)} – {slotLabel(b.end)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       </section>
     </main>

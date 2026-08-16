@@ -6,12 +6,12 @@ import { AvailabilityGrid } from "./AvailabilityGrid";
 import { saveAvailability } from "./actions";
 import {
   DAY_LABELS,
-  SLOTS_PER_DAY,
   timeToSlot,
   slotLabel,
   computeOverlap,
   mergeSlots,
 } from "@/lib/availability";
+import { Heatmap } from "@/components/Heatmap";
 
 export default async function AvailabilityPage({
   params,
@@ -85,24 +85,23 @@ export default async function AvailabilityPage({
   }
 
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-10">
+    <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-12">
       <Link
-        href={`/groups/${id}`}
-        className="text-sm text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
+        href={`/groups/${id}`} className="text-[14px] text-muted transition-colors hover:text-ink"
       >
         ← {group?.name ?? "Back to group"}
       </Link>
 
-      <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+      <h1 className="display mt-5 text-[34px] leading-tight">
         Weekly availability
       </h1>
 
       {/* Editable grid */}
-      <div className="mt-6 rounded-2xl border border-zinc-200 bg-white/70 p-6 shadow-sm backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/60">
-        <h2 className="font-bold text-zinc-900 dark:text-white">
+      <div className="mt-8 rounded-2xl border border-line bg-surface p-6">
+        <h2 className="text-[15px] font-medium">
           Your free time
         </h2>
-        <p className="mt-1 mb-4 text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="mt-1 mb-4 text-[14px] text-muted">
           Click and drag to mark when you&apos;re usually free, then save.
         </p>
         <AvailabilityGrid
@@ -113,21 +112,21 @@ export default async function AvailabilityPage({
       </div>
 
       {/* Overlap heatmap */}
-      <div className="mt-6 rounded-2xl border border-zinc-200 bg-white/70 p-6 shadow-sm backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/60">
-        <h2 className="font-bold text-zinc-900 dark:text-white">
+      <div className="mt-8 rounded-2xl border border-line bg-surface p-6">
+        <h2 className="text-[15px] font-medium">
           Group overlap
         </h2>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="mt-1 text-[14px] text-muted">
           Darker green = more people free. Based on {totalMembers}{" "}
           {totalMembers === 1 ? "member" : "members"}.
         </p>
 
         {maxOverlap > 0 && (
-          <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-500/30 dark:bg-emerald-950/30">
-            <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
-              ⭐ Best times — {maxOverlap} of {totalMembers} free
+          <div className="mt-4 border-t border-line pt-4">
+            <p className="label">
+              Everyone free · {maxOverlap} of {totalMembers}
             </p>
-            <ul className="mt-1 flex flex-wrap gap-x-4 text-sm text-emerald-700 dark:text-emerald-400">
+            <ul className="nums mt-2 flex flex-wrap gap-x-6 gap-y-1 text-[15px] text-accent">
               {bestTimes.map((b, i) => (
                 <li key={i}>
                   {DAY_LABELS[b.day]} {slotLabel(b.start)} – {slotLabel(b.end)}
@@ -137,57 +136,12 @@ export default async function AvailabilityPage({
           </div>
         )}
 
-        <div className="mt-4 overflow-x-auto">
-          <table className="border-collapse">
-            <thead>
-              <tr>
-                <th className="w-16"></th>
-                {DAY_LABELS.map((d) => (
-                  <th
-                    key={d}
-                    className="px-1 pb-2 text-xs font-medium text-zinc-600 dark:text-zinc-400"
-                  >
-                    {d}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {Array.from({ length: SLOTS_PER_DAY }).map((_, slot) => (
-                <tr key={slot}>
-                  <td className="pr-2 text-right align-top text-[10px] leading-5 text-zinc-400">
-                    {slot % 2 === 0 ? slotLabel(slot) : ""}
-                  </td>
-                  {DAY_LABELS.map((dayLabel, day) => {
-                    const count = heatmap[day][slot];
-                    const ratio = totalMembers > 0 ? count / totalMembers : 0;
-                    const isBest = maxOverlap > 0 && count === maxOverlap;
-                    return (
-                      <td key={day} className="p-0">
-                        <div
-                          title={`${count}/${totalMembers} free — ${dayLabel} ${slotLabel(
-                            slot
-                          )}`}
-                          className={
-                            "h-5 w-10 border border-zinc-200 dark:border-zinc-700/60 " +
-                            (isBest
-                              ? "ring-2 ring-inset ring-emerald-600 dark:ring-emerald-400"
-                              : "")
-                          }
-                          style={{
-                            backgroundColor:
-                              count === 0
-                                ? undefined
-                                : `rgba(16, 185, 129, ${0.15 + 0.85 * ratio})`,
-                          }}
-                        />
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="mt-4">
+          <Heatmap
+            heatmap={heatmap}
+            totalMembers={totalMembers}
+            maxOverlap={maxOverlap}
+          />
         </div>
       </div>
     </main>
