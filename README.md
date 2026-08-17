@@ -1,115 +1,117 @@
-# StudySync 📅
+# StudySync
 
-**Find a time that actually works for everyone.**
+Finding a time that works for six people is the part of a study group that
+actually kills it. StudySync is a web app where students make a group for a
+course, everyone paints in the hours they are free, and the app works out when
+the most people overlap. RSVP "going" to a session and it lands on your Google
+Calendar.
 
-StudySync is a full-stack web app where students create study groups for their
-courses, schedule sessions, and use a When2meet-style availability overlap tool
-to find times that work for the whole group. RSVPing "going" to a session adds
-it straight to the student's Google Calendar.
+There is a public demo at `/demo` that needs no account, so you can see the
+heatmap before deciding whether to sign in.
 
-> Built with Next.js (App Router), TypeScript, Tailwind CSS, Supabase
-> (PostgreSQL), NextAuth, and the Google Calendar API.
+## What it does
 
-<!-- Add a screenshot or two here once deployed:
-![Dashboard](docs/dashboard.png)
-![Availability heatmap](docs/heatmap.png)
--->
+Sign in with Google through NextAuth.
 
----
+Make a group per course, share the invite code, and people join with it.
 
-## Features
+Schedule sessions with a title, a time and a place or a link, and RSVP going,
+maybe or can't go.
 
-- **Google sign-in** via NextAuth (OAuth 2.0).
-- **Study groups** — create a group per course, share an invite code, join with one.
-- **Sessions & RSVPs** — schedule sessions (title, time, location/link) and RSVP going / maybe / can't go.
-- **Availability heatmap** — each member paints their weekly free time on a grid; the app computes and visualizes when the most people overlap, and suggests the best meeting times.
-- **Google Calendar sync** — RSVPing "going" creates the event on your calendar; backing out removes it.
-- **Dashboard** — all your groups at a glance, each color-coded by course.
+Paint your weekly free time on a grid. The app tallies everyone's and shows
+where the overlap is deepest, then suggests the best times to meet.
 
-## Tech stack
+RSVP going and the event is created on your Google Calendar. Back out and it is
+removed.
 
-| Layer | Choice |
+The dashboard shows every group you are in, colour-coded by course.
+
+## Stack
+
+| Layer | What |
 |---|---|
-| Framework | Next.js (App Router) + React Server Components |
+| Framework | Next.js, App Router, React Server Components |
 | Language | TypeScript |
-| Styling | Tailwind CSS |
-| Database | PostgreSQL via Supabase |
-| Auth | NextAuth (Auth.js v5) + Google OAuth |
-| External API | Google Calendar API |
+| Styling | Tailwind |
+| Database | Postgres via Supabase |
+| Auth | NextAuth (Auth.js v5) with Google OAuth |
+| External API | Google Calendar |
 | Hosting | Vercel |
 
-## The availability overlap algorithm
+## How the overlap is worked out
 
-The core feature. Each member's free time is stored as weekly time **ranges**
-(e.g. `Tue 09:30–17:00`). To find the best meeting time:
+This is the part worth reading. Each member's free time is stored as weekly
+ranges, something like Tuesday 09:30 to 17:00. To turn that into a best meeting
+time:
 
-1. **Discretize** the week into 30-minute slots (a 7 × 28 grid).
-2. **Tally:** for every member's every free block, add `+1` to each slot that
-   block covers. After all members, `heatmap[day][slot]` holds how many people
-   are free in that slot.
-3. **Find the peak:** the slot(s) with the highest count are the best times.
-4. **Render:** each cell's color intensity = `count / memberCount` (darker =
-   more people free), and tied-for-best slots are merged back into readable
-   ranges for a "best times" suggestion.
+1. Cut the week into 30-minute slots, giving a 7 by 28 grid.
+2. For every free block a member has, add one to each slot that block covers.
+   Once everyone is counted, `heatmap[day][slot]` is how many people are free
+   then.
+3. The slots with the highest count are the best times.
+4. Each cell is shaded by count over member count, so darker means more people
+   free, and slots tied for best are merged back into readable ranges for the
+   suggestion.
 
-It runs in **O(members × blocks × slots-per-block)** — linear in the amount of
-availability data. See [`lib/availability.ts`](lib/availability.ts).
+It runs linearly in the amount of availability data, members times blocks times
+slots per block. The code is in [`lib/availability.ts`](lib/availability.ts),
+and the grid itself is [`components/Heatmap.tsx`](components/Heatmap.tsx), which
+both the real page and the demo render so the two cannot drift apart.
 
-## Architecture highlights
+## Notes on the structure
 
-- **Server Components + Server Actions** — pages render on the server and read
-  the session with `auth()`; mutations (create group, RSVP, save availability)
-  are server actions, no hand-written API endpoints.
-- **Security** — every table has Row Level Security enabled with no policies, so
-  the public Supabase key can't touch the database; all access goes through the
-  server using the service-role key, and every action re-checks authorization.
-- **Google tokens** are stored server-side (in the DB, never exposed to the
-  browser) and refreshed automatically when they expire.
+Pages render on the server and read the session with `auth()`. Mutations, so
+creating a group, RSVPing, saving availability, are server actions rather than
+hand-written API routes.
 
-## Local development
+On security: every table has row-level security on with no policies at all,
+which means the public Supabase key cannot read or write anything. All access
+goes through the server with the service-role key, and each action re-checks
+that the caller is allowed to do what they asked.
 
-### Prerequisites
-- Node.js 20+
-- A [Supabase](https://supabase.com) project
-- A Google Cloud project with OAuth credentials + the Calendar API enabled
+Google tokens are kept server-side in the database, never handed to the browser,
+and refreshed when they expire.
 
-### Setup
+## Running it locally
+
+You need Node 20 or newer, a Supabase project, and a Google Cloud project with
+OAuth credentials and the Calendar API turned on.
 
 ```bash
-# 1. Install dependencies
 npm install
-
-# 2. Configure environment variables
 cp .env.example .env.local
-#    then fill in the values (see .env.example for what each one is)
+```
 
-# 3. Create the database schema
-#    Paste db/schema.sql into the Supabase SQL Editor and run it,
-#    then run each file in db/migrations/ in order.
+Fill in `.env.local`. `.env.example` says what each value is.
 
-# 4. Start the dev server
+Create the schema by pasting `db/schema.sql` into the Supabase SQL editor and
+running it, then run each file in `db/migrations/` in order.
+
+```bash
 npm run dev
 ```
 
-Open http://localhost:3000.
+That serves on http://localhost:3000.
 
-For Google sign-in locally, add this Authorized redirect URI to your OAuth
-client: `http://localhost:3000/api/auth/callback/google`.
+For Google sign-in to work locally, add
+`http://localhost:3000/api/auth/callback/google` as an authorised redirect URI
+on your OAuth client.
 
-### Project layout
+## Layout
 
 ```
-app/                     # routes (App Router)
-  page.tsx               # landing
-  dashboard/             # your groups
-  groups/[id]/           # group detail, availability grid, new session
-  sessions/[id]/         # session detail + RSVP
-  api/auth/              # NextAuth handlers
-lib/                     # supabase client, availability algorithm, helpers
-db/                      # schema.sql + migrations
-components/              # shared UI (header)
+app/
+  page.tsx          landing
+  demo/             public demo, no account needed
+  dashboard/        your groups
+  groups/[id]/      group detail, availability grid, new session
+  sessions/[id]/    session detail and RSVP
+  api/auth/         NextAuth handlers
+lib/                supabase client, the availability algorithm, helpers
+components/         shared UI, the heatmap, the theme toggle
+db/                 schema.sql and migrations
 ```
 
 ## License
 
-MIT — personal learning project.
+MIT. It is a personal learning project.
